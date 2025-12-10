@@ -2,5 +2,8 @@
   <Folder Name="/Solution Items/">
     <File Path="Directory.Packages.props" />
   </Folder>
+  <Project Path="Tiendasp.API.Identity/Tiendasp.API.Identity.csproj" />
   <Project Path="Tiendasp.Host/Tiendasp.Host.csproj" />
+  <Project Path="Tiendasp.ServiceDefaults/Tiendasp.ServiceDefaults.csproj" Id="15cede95-1132-41fa-80f9-864ac68ce42c" />
+  <Project Path="Tiendasp.Shared/Tiendasp.Shared.csproj" Id="0de0420e-a9b9-4d66-b1b9-0b13bdd1919f" />
 </Solution>
