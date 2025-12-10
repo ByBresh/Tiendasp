@@ -87,18 +87,23 @@ public static class AuthApis
     {
         try
         {
-            var user = await userManager.FindByEmailAsync(request.Email);
-
-            if (user != null)
-                return Results.Unauthorized();
-
             var result = await userManager.CreateAsync(new IdentityUser
             {
                 UserName = request.Email.Split("@")[0],
                 Email = request.Email
             }, request.Password);
 
-            user = await userManager.FindByEmailAsync(request.Email);
+            if (!result.Succeeded)
+            {
+                return Results.ValidationProblem(
+                    result.Errors.ToDictionary(
+                        e => e.Code,
+                        e => new[] { e.Description }
+                    )
+                );
+            }
+
+            var user = await userManager.FindByEmailAsync(request.Email);
 
             if (result == null || user == null)
                 return Results.InternalServerError();
