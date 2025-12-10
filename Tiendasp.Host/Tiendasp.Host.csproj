@@ -13,6 +13,11 @@
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" />
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tiendasp.API.Identity\Tiendasp.API.Identity.csproj" />
   </ItemGroup>
 
 </Project>
