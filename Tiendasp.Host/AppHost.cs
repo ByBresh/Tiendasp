@@ -10,7 +10,8 @@ var postgres = builder
     .AddPostgres("postgres")
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume("tiendasp-postgres")
-    .WithPgAdmin(pgAdmin => pgAdmin.WithHostPort(5050));
+    .WithPgAdmin(pgAdmin => pgAdmin.WithHostPort(5050)
+        .WithLifetime(ContainerLifetime.Persistent));
 
 var db = postgres.AddDatabase("identity");
 
