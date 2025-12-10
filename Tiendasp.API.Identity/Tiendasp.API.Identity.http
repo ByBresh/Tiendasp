@@ -1,0 +1,6 @@
+@Tiendasp.API.Identity_HostAddress = http://localhost:5104
+
+GET {{Tiendasp.API.Identity_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
