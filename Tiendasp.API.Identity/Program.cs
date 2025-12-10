@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Tiendasp.API.Identity;
 using Scalar.AspNetCore;
 using System.Text;
+using Tiendasp.API.Identity.MinimalApis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -115,7 +116,14 @@ var authGroup = app.MapGroup("/api/v{version:apiVersion}/auth")
     .WithApiVersionSet(versionSet)
     .MapToApiVersion(new ApiVersion(1));
 
-authGroup.MapApiEndpoints();
+authGroup.MapAuthApiEndpoints();
+
+// Map User endpoints
+var userGroup = app.MapGroup("/api/v{version:apiVersion}/user")
+    .WithApiVersionSet(versionSet)
+    .MapToApiVersion(new ApiVersion(1));
+
+userGroup.MapUserApiEndpoints();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

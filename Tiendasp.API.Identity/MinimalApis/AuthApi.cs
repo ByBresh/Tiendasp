@@ -7,10 +7,10 @@ using System.Text;
 using Tiendasp.API.Identity.Dto.Auth;
 using Tiendasp.Shared.Events;
 
-namespace Tiendasp.API.Identity;
-public static class AuthApis
+namespace Tiendasp.API.Identity.MinimalApis;
+public static class AuthApi
 {
-    public static RouteGroupBuilder MapApiEndpoints(this RouteGroupBuilder groups)
+    public static RouteGroupBuilder MapAuthApiEndpoints(this RouteGroupBuilder groups)
     {
         groups.MapPost("login", LoginAsync).WithName("Login");
         groups.MapPost("register", RegisterAsync).WithName("Register");
