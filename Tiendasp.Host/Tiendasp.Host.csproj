@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Tiendasp.API.Identity\Tiendasp.API.Identity.csproj" />
+    <ProjectReference Include="..\Tiendasp.API.Products\Tiendasp.API.Products.csproj" />
   </ItemGroup>
 
 </Project>

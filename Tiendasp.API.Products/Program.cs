@@ -1,13 +1,12 @@
 using Asp.Versioning;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Tiendasp.API.Identity;
 using Scalar.AspNetCore;
 using System.Text;
-using Tiendasp.API.Identity.MinimalApis;
+using Tiendasp.API.Products;
+using Tiendasp.API.Products.MinimalApis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,37 +50,13 @@ builder.Services.AddApiVersioning(options =>
     options.SubstituteApiVersionInUrl = true;
 });
 
-builder.AddNpgsqlDbContext<MyAppContext>("identity");
+builder.AddNpgsqlDbContext<ProductsDbContext>("products");
 
-// Configure Identity BEFORE Authentication
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
-{
-    // Password settings
-    options.Password.RequireDigit = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireUppercase = true;
-    options.Password.RequireNonAlphanumeric = true;
-    options.Password.RequiredLength = 8;
-
-    // Lockout settings
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-    options.Lockout.MaxFailedAccessAttempts = 5;
-    options.Lockout.AllowedForNewUsers = true;
-
-    // User settings
-    options.User.RequireUniqueEmail = true;
-
-    // Sign in settings
-    options.SignIn.RequireConfirmedEmail = false; // Set to true in production
-})
-//.AddRoles<IdentityRole>()
-.AddEntityFrameworkStores<MyAppContext>()
-.AddDefaultTokenProviders();
-
-// Configure Authentication with JWT as default
+// Configure Authentication with JWT (validates tokens from Identity service)
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
@@ -106,19 +81,19 @@ var versionSet = app.NewApiVersionSet()
                     .ReportApiVersions()
                     .Build();
 
-// Map Auth endpoints
-var authGroup = app.MapGroup("/api/v{version:apiVersion}/auth")
+// Map Product endpoints
+var productGroup = app.MapGroup("/api/v{version:apiVersion}/product")
     .WithApiVersionSet(versionSet)
     .MapToApiVersion(new ApiVersion(1));
 
-authGroup.MapAuthApiEndpoints();
+productGroup.MapProductApiEndpoints();
 
-// Map User endpoints
-var userGroup = app.MapGroup("/api/v{version:apiVersion}/user")
+// Map Category endpoints
+var categoryGroup = app.MapGroup("/api/v{version:apiVersion}/category")
     .WithApiVersionSet(versionSet)
     .MapToApiVersion(new ApiVersion(1));
 
-userGroup.MapUserApiEndpoints();
+categoryGroup.MapCategoryApiEndpoints();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -135,7 +110,7 @@ if (app.Environment.IsDevelopment())
 // Apply migrations before requests are processed
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<MyAppContext>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ProductsDbContext>();
     try
     {
         await dbContext.Database.MigrateAsync();
