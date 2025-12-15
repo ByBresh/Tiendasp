@@ -1,9 +1,11 @@
-﻿namespace Tiendasp.API.Products.Dto.Category
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Tiendasp.API.Products.Dto.Category
 {
     public class CreateCategoryRequest
     {
-        public required string Name { get; set; }
+        [Required(AllowEmptyStrings = false)]
+        public string Name { get; set; } = null!;
         public string? Description { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

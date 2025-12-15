@@ -6,9 +6,9 @@ namespace Tiendasp.API.Identity.Dto.Auth
     {
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "Invalid email format")]
-        public required string Email { get; set; }
+        public string Email { get; set; } = null!;
 
         [Required(ErrorMessage = "Password is required")]
-        public required string Password { get; set; }
+        public string Password { get; set; } = null!;
     }
 }

@@ -56,7 +56,7 @@ namespace Tiendasp.API.Products.MinimalApis
 
         public static async Task<IResult> UpdateCategoryAsync(
             Guid id,
-            UpdateCategoryRequest request,
+            CreateCategoryRequest request,
             ProductsDbContext db)
         {
             var category = await db.Categories.FindAsync(id);

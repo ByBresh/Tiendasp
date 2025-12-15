@@ -5,9 +5,9 @@ namespace Tiendasp.API.Identity.Dto.User
     public class ChangePasswordRequest
     {
         [Required(ErrorMessage = "Old password is required")]
-        public required string OldPassword { get; set; }
-        
+        public string OldPassword { get; set; } = null!;
+
         [Required(ErrorMessage = "New password is required")]
-        public required string NewPassword { get; set; }
+        public string NewPassword { get; set; } = null!;
     }
 }

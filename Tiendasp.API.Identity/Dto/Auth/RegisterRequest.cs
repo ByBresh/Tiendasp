@@ -4,11 +4,15 @@ namespace Tiendasp.API.Identity.Dto.Auth
 {
     public class RegisterRequest
     {
-        public required string Email { get; set; }
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email format")]
+        public string Email { get; set; } = null!;
 
-        public required string Password { get; set; }
+        [Required(ErrorMessage = "Password is required")]
+        public string Password { get; set; } = null!;
 
+        [Required(ErrorMessage = "Confirm password is required")]
         [Compare("Password", ErrorMessage = "Passwords do not match")]
-        public required string ConfirmPassword { get; set; }
+        public string ConfirmPassword { get; set; } = null!;
     }
 }
