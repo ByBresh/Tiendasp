@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Tiendasp.API.Products.Dto.Category;
 using Tiendasp.API.Products.Dto.Product;
 using Tiendasp.API.Products.Entities;
@@ -14,6 +15,9 @@ namespace Tiendasp.API.Products.MinimalApis
             groups.MapGet("{id:guid}/detailed", GetProductDetailedAsync).WithName("Get Product Detailed").RequireAuthorization("AdminOnly");
             groups.MapPut("{id:guid}", UpdateProductAsync).WithName("Update Product").RequireAuthorization("AdminOnly");
             groups.MapPatch("{id:guid}/stock", AdjustStockAsync).WithName("Adjust Stock").RequireAuthorization("AdminOnly");
+
+            // Client endpoints
+            groups.MapGet("list", ListProducts).WithName("List Products");
             return groups;
         }
 
@@ -171,6 +175,59 @@ namespace Tiendasp.API.Products.MinimalApis
             }
 
             return null;
+        }
+
+        public static async Task<IResult> ListProducts(
+            ProductsDbContext db,
+            [FromQuery] Guid? cId = null,
+            [FromQuery] string? orderBy = null,
+            [FromQuery] bool desc = false,
+            [FromQuery] string? s = null)
+        {
+            var query = db.Products
+                .AsQueryable();
+
+            if (cId.HasValue)
+            {
+                query = query
+                    .Where(p => p.Categories.Any(c => c.Id == cId.Value));
+            }
+
+            query = orderBy?.ToLowerInvariant() switch
+            {
+                "name" => desc ? query.OrderByDescending(p => p.Name) : query.OrderBy(p => p.Name),
+                "price" => desc ? query.OrderByDescending(p => p.Price) : query.OrderBy(p => p.Price),
+                "created" => desc ? query.OrderByDescending(p => p.CreatedAt) : query.OrderBy(p => p.CreatedAt),
+                _ => query.OrderByDescending(p => p.CreatedAt) // Default: newest first
+            };
+
+            if (!string.IsNullOrWhiteSpace(s))
+            {
+                s = s.Trim().ToLowerInvariant();
+                query = query.Where(p =>
+                    p.Name.ToLower().Contains(s) ||
+                    (p.Description != null && p.Description.ToLower().Contains(s)));
+            }
+
+            var products = await query
+                .Include(p => p.Categories)
+                .ToListAsync();
+
+            var response = products.Select(product => new ProductSummary
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                ImageUrl = product.ImageUrl,
+                IsActive = product.IsActive,
+                Categories = [.. product.Categories.Select(c => new CategorySummary
+                {
+                    Id = c.Id,
+                    Name = c.Name
+                })]
+            }).ToList();
+            return Results.Ok(response);
         }
     }
 }
