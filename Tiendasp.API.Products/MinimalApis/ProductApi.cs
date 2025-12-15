@@ -10,10 +10,10 @@ namespace Tiendasp.API.Products.MinimalApis
 
         public static RouteGroupBuilder MapProductApiEndpoints(this RouteGroupBuilder groups)
         {
-            groups.MapPost("", CreateProductAsync).WithName("Create product");
-            groups.MapGet("{id:guid}", GetProductAsync).WithName("Get Product");
-            groups.MapPut("{id:guid}", UpdateProductAsync).WithName("Update Product");
-            groups.MapPatch("{id:guid}/stock", AdjustStockAsync).WithName("Adjust Stock");
+            groups.MapPost("", CreateProductAsync).WithName("Create product").RequireAuthorization("AdminOnly");
+            groups.MapGet("{id:guid}/detailed", GetProductDetailedAsync).WithName("Get Product Detailed").RequireAuthorization("AdminOnly");
+            groups.MapPut("{id:guid}", UpdateProductAsync).WithName("Update Product").RequireAuthorization("AdminOnly");
+            groups.MapPatch("{id:guid}/stock", AdjustStockAsync).WithName("Adjust Stock").RequireAuthorization("AdminOnly");
             return groups;
         }
 
@@ -66,7 +66,7 @@ namespace Tiendasp.API.Products.MinimalApis
             return Results.CreatedAtRoute("Get Product", new { id = product.Id }, response);
         }
 
-        public static async Task<IResult> GetProductAsync(
+        public static async Task<IResult> GetProductDetailedAsync(
             Guid id,
             ProductsDbContext db)
         {

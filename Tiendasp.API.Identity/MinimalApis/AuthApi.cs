@@ -108,6 +108,8 @@ public static class AuthApi
             if (result == null || user == null)
                 return Results.InternalServerError();
 
+            await userManager.AddToRoleAsync(user, "User");
+
             await publishEndpoint.Publish(new UserCreatedEvent(user.Id, user.Email!));
 
             var loginResponse = await LoginAsync(new LoginRequest { Email = request.Email, Password = request.Password }, userManager, configuration);

@@ -82,6 +82,7 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
@@ -97,7 +98,9 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"))
+    .AddPolicy("UserOrAdmin", policy => policy.RequireRole("User", "Admin"));
 
 var app = builder.Build();
 
@@ -145,6 +148,56 @@ using (var scope = app.Services.CreateScope())
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "An error occurred while migrating the database.");
         throw;
+    }
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+
+    // Generate roles
+    var roles = new[] { "Admin", "User" };
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
+
+    // Generate an admin user
+    var adminEmail = configuration["Admin:Email"] ?? "admin@localhost";
+    var adminPassword = configuration["Admin:Password"];
+    if (string.IsNullOrEmpty(adminPassword))
+    {
+        logger.LogWarning("Admin password is not set in configuration. Using default password 'Admin@123'. Please change it immediately.");
+        adminPassword = "Admin@123";
+    }
+    var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
+    if (existingAdmin == null)
+    {
+        var adminUser = new IdentityUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            EmailConfirmed = true
+        };
+        var result = await userManager.CreateAsync(adminUser, adminPassword);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+            logger.LogInformation("Admin user '{Email}' created successfully.", adminEmail);
+        }
+        else
+        {
+            logger.LogError("Failed to create admin user: {Errors}",
+                string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+#pragma warning restore CA1873 // Avoid potentially expensive logging
     }
 }
 

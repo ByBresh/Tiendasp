@@ -7,9 +7,9 @@ namespace Tiendasp.API.Products.MinimalApis
     {
         public static RouteGroupBuilder MapCategoryApiEndpoints(this RouteGroupBuilder groups)
         {
-            groups.MapPost("", CreateCategoryAsync).WithName("Create Category");
-            groups.MapGet("{id:guid}", GetCategoryAsync).WithName("Get Category");
-            groups.MapPut("{id:guid}", UpdateCategoryAsync).WithName("Update Category");
+            groups.MapPost("", CreateCategoryAsync).WithName("Create Category").RequireAuthorization("AdminOnly");
+            groups.MapGet("{id:guid}", GetCategoryAsync).WithName("Get Category").RequireAuthorization("AdminOnly");
+            groups.MapPut("{id:guid}", UpdateCategoryAsync).WithName("Update Category").RequireAuthorization("AdminOnly");
             return groups;
         }
 
