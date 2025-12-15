@@ -1,4 +1,6 @@
-﻿namespace Tiendasp.API.Products.Dto.Product
+﻿using Tiendasp.API.Products.Dto.Category;
+
+namespace Tiendasp.API.Products.Dto.Product
 {
     public class ProductResponse
     {
@@ -12,5 +14,6 @@
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public bool IsActive { get; set; }
+        public List<CategorySummary> Categories { get; set; } = [];
     }
 }

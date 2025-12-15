@@ -11,5 +11,6 @@ namespace Tiendasp.API.Products.Dto.Product
         public int Stock { get; set; }
         public bool IsDisabled { get; set; }
         // public string? ImageUrl { get; set; }
+        public List<Guid> CategoryIds { get; set; } = [];
     }
 }

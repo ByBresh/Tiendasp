@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Tiendasp.API.Products.Dto.Category;
 using Tiendasp.API.Products.Dto.Product;
 using Tiendasp.API.Products.Entities;
 
@@ -20,6 +21,14 @@ namespace Tiendasp.API.Products.MinimalApis
             CreateProductRequest request,
             ProductsDbContext db)
         {
+            var validationError = await ValidateCategoryIdsAsync(request.CategoryIds, db);
+            if (validationError is not null)
+                return validationError;
+
+            var categories = await db.Categories
+                .Where(c => request.CategoryIds.Contains(c.Id))
+                .ToListAsync();
+
             var product = new Product
             {
                 Id = Guid.NewGuid(),
@@ -28,6 +37,7 @@ namespace Tiendasp.API.Products.MinimalApis
                 Price = request.Price,
                 Stock = request.Stock,
                 IsDisabled = request.IsDisabled || request.Stock < 1 || request.Price == null,
+                Categories = categories,
             }; // TODO: Handle Image Upload
 
             db.Products.Add(product);
@@ -45,6 +55,12 @@ namespace Tiendasp.API.Products.MinimalApis
                 CreatedAt = product.CreatedAt,
                 UpdatedAt = product.UpdatedAt,
                 IsActive = product.IsActive,
+                Categories = [.. product.Categories
+                    .Select(pc => new CategorySummary
+                    {
+                        Id = pc.Id,
+                        Name = pc.Name
+                    })]
             };
 
             return Results.CreatedAtRoute("Get Product", new { id = product.Id }, response);
@@ -54,7 +70,9 @@ namespace Tiendasp.API.Products.MinimalApis
             Guid id,
             ProductsDbContext db)
         {
-            var product = await db.Products.FindAsync(id);
+            var product = await db.Products
+                .Include(p => p.Categories)
+                .FirstOrDefaultAsync(p => p.Id == id);
             if (product == null)
                 return Results.NotFound();
             var response = new ProductResponse
@@ -69,6 +87,12 @@ namespace Tiendasp.API.Products.MinimalApis
                 CreatedAt = product.CreatedAt,
                 UpdatedAt = product.UpdatedAt,
                 IsActive = product.IsActive,
+                Categories = [.. product.Categories
+                    .Select(pc => new CategorySummary
+                    {
+                        Id = pc.Id,
+                        Name = pc.Name
+                    })]
             };
             return Results.Ok(response);
         }
@@ -78,14 +102,25 @@ namespace Tiendasp.API.Products.MinimalApis
             UpdateProductRequest request,
             ProductsDbContext db)
         {
-            var product = await db.Products.FindAsync(id);
+            var validationError = await ValidateCategoryIdsAsync(request.CategoryIds, db);
+            if (validationError is not null)
+                return validationError;
+
+            var product = await db.Products
+                .Include(p => p.Categories)
+                .FirstOrDefaultAsync(p => p.Id == id);
             if (product == null)
                 return Results.NotFound();
+
+            var categories = await db.Categories
+                .Where(c => request.CategoryIds.Contains(c.Id))
+                .ToListAsync();
+
             product.Name = request.Name;
             product.Description = request.Description;
             product.Price = request.Price;
             product.IsDisabled = request.IsDisabled || product.Stock < 1 || product.Price == null;
-            product.UpdatedAt = DateTime.UtcNow;
+            product.Categories = categories;
             // TODO: Handle Image Upload
 
             await db.SaveChangesAsync();
@@ -112,6 +147,30 @@ namespace Tiendasp.API.Products.MinimalApis
             }
 
             return Results.NoContent();
+        }
+
+        private static async Task<IResult?> ValidateCategoryIdsAsync(
+            List<Guid> categoryIds,
+            ProductsDbContext db)
+        {
+            if (categoryIds.Count == 0)
+                return null;
+
+            var existingIds = await db.Categories
+                .Where(c => categoryIds.Contains(c.Id))
+                .Select(c => c.Id)
+                .ToListAsync();
+
+            var invalidIds = categoryIds.Except(existingIds).ToList();
+            if (invalidIds.Count > 0)
+            {
+                return Results.ValidationProblem(new Dictionary<string, string[]>
+                {
+                    ["CategoryIds"] = [$"Categories not found: {string.Join(", ", invalidIds)}"]
+                });
+            }
+
+            return null;
         }
     }
 }
