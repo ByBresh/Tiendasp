@@ -3,6 +3,7 @@
     <File Path=".gitignore" />
     <File Path="Directory.Packages.props" />
   </Folder>
+  <Project Path="Tiendasp.API.Gateway/Tiendasp.API.Gateway.csproj" />
   <Project Path="Tiendasp.API.Identity/Tiendasp.API.Identity.csproj" />
   <Project Path="Tiendasp.API.Products/Tiendasp.API.Products.csproj" />
   <Project Path="Tiendasp.Host/Tiendasp.Host.csproj" />

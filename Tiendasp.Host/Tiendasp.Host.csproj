@@ -14,9 +14,11 @@
     <PackageReference Include="Aspire.Hosting.AppHost" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" />
     <PackageReference Include="Aspire.Hosting.RabbitMQ" />
+    <PackageReference Include="Aspire.Hosting.Redis" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Tiendasp.API.Gateway\Tiendasp.API.Gateway.csproj" />
     <ProjectReference Include="..\Tiendasp.API.Identity\Tiendasp.API.Identity.csproj" />
     <ProjectReference Include="..\Tiendasp.API.Products\Tiendasp.API.Products.csproj" />
   </ItemGroup>

@@ -67,7 +67,7 @@ namespace Tiendasp.API.Products.MinimalApis
                     })]
             };
 
-            return Results.CreatedAtRoute("Get Product", new { id = product.Id }, response);
+            return Results.CreatedAtRoute("Get Product Detailed", new { id = product.Id }, response);
         }
 
         public static async Task<IResult> GetProductDetailedAsync(
