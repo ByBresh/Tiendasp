@@ -44,6 +44,55 @@ namespace Tiendasp.API.Products.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("Tiendasp.API.Products.Entities.Order", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("Tiendasp.API.Products.Entities.OrderItem", b =>
+                {
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.HasKey("OrderId", "ProductId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("OrderItems");
+                });
+
             modelBuilder.Entity("Tiendasp.API.Products.Entities.Product", b =>
                 {
                     b.Property<Guid>("Id")
@@ -97,6 +146,25 @@ namespace Tiendasp.API.Products.Migrations
                     b.ToTable("ProductCategories");
                 });
 
+            modelBuilder.Entity("Tiendasp.API.Products.Entities.OrderItem", b =>
+                {
+                    b.HasOne("Tiendasp.API.Products.Entities.Order", "Order")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Tiendasp.API.Products.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Tiendasp.API.Products.Entities.ProductCategory", b =>
                 {
                     b.HasOne("Tiendasp.API.Products.Entities.Category", "Category")
@@ -119,6 +187,11 @@ namespace Tiendasp.API.Products.Migrations
             modelBuilder.Entity("Tiendasp.API.Products.Entities.Category", b =>
                 {
                     b.Navigation("ProductCategories");
+                });
+
+            modelBuilder.Entity("Tiendasp.API.Products.Entities.Order", b =>
+                {
+                    b.Navigation("OrderItems");
                 });
 
             modelBuilder.Entity("Tiendasp.API.Products.Entities.Product", b =>

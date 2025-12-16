@@ -1,4 +1,6 @@
-﻿using Tiendasp.API.Products.Dto.Category;
+﻿using MassTransit;
+using Microsoft.EntityFrameworkCore;
+using Tiendasp.API.Products.Dto.Category;
 using Tiendasp.API.Products.Entities;
 
 namespace Tiendasp.API.Products.MinimalApis
@@ -8,10 +10,12 @@ namespace Tiendasp.API.Products.MinimalApis
         public static RouteGroupBuilder MapCategoryApiEndpoints(this RouteGroupBuilder groups)
         {
             groups.MapPost("", CreateCategoryAsync).WithName("Create Category").RequireAuthorization("AdminOnly");
+            groups.MapGet("", GetCategoriesAsync).WithName("Get Categories");
             groups.MapGet("{id:guid}", GetCategoryAsync).WithName("Get Category").RequireAuthorization("AdminOnly");
             groups.MapPut("{id:guid}", UpdateCategoryAsync).WithName("Update Category").RequireAuthorization("AdminOnly");
             return groups;
         }
+
 
         public static async Task<IResult> CreateCategoryAsync(
             CreateCategoryRequest request,
@@ -35,6 +39,16 @@ namespace Tiendasp.API.Products.MinimalApis
             return Results.CreatedAtRoute("Get Category", new { id = category.Id }, response);
         }
 
+        private static async Task<IResult> GetCategoriesAsync(
+            ProductsDbContext db)
+        {
+            var categories = await db.Categories.ToListAsync();
+            return Results.Ok(categories.Select(c => new CategorySummary
+            {
+                Id = c.Id,
+                Name = c.Name
+            }));
+        }
         public static async Task<IResult> GetCategoryAsync(
             Guid id,
             ProductsDbContext db)

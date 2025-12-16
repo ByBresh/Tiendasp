@@ -98,6 +98,13 @@ var categoryGroup = app.MapGroup("/api/v{version:apiVersion}/category")
 
 categoryGroup.MapCategoryApiEndpoints();
 
+// Map Order endpoints
+var orderGroup = app.MapGroup("/api/v{version:apiVersion}/order")
+    .WithApiVersionSet(versionSet)
+    .MapToApiVersion(new ApiVersion(1));
+
+orderGroup.MapOrderApiEndpoints();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
